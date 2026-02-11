@@ -1,0 +1,41 @@
+{
+  "email": {
+    "sender_email": "your_email@qq.com",
+    "sender_password": "",
+    "smtp_server": "smtp.qq.com",
+    "smtp_port": 465,
+    "recipient_email": "recipient@example.com"
+  },
+  "settings": {
+    "email_subject": "AI新闻日报 - {date}",
+    "html_email": true,
+    "qq_mail_format": true
+  },
+  "ai": {
+    "enabled": true,
+    "ollama_url": "http://localhost:11434",
+    "model_name": "qwen2.5:7b-instruct",
+    "temperature": 0.7,
+    "max_tokens": 2000,
+    "timeout": 60,
+    "enable_filter": true
+  },
+  "fetcher": {
+    "max_news_per_source": 5,
+    "concurrent_requests": 3,
+    "retry_times": 2,
+    "retry_delay": 1,
+    "enable_github": true,
+    "enable_huggingface": true,
+    "use_exponential_backoff": true,
+    "max_backoff_time": 60.0,
+    "dynamic_concurrency": false,
+    "incremental_fetch": false,
+    "check_hours": 24
+  },
+  "output": {
+    "save_json": true,
+    "save_html": true,
+    "output_dir": "output"
+  }
+}

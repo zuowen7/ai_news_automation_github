@@ -1,0 +1,48 @@
+name: Daily News Fetch
+
+on:
+  schedule:
+    # 每天 UTC 时间 00:00 运行（北京时间 08:00）
+    - cron: '0 0 * * *'
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  fetch-news:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Create config
+      run: |
+        cp config.example.json config.json
+        # 从 GitHub Secrets 读取配置
+        if [ -n "${{ secrets.SENDER_EMAIL }}" ]; then
+          sed -i "s/your_email@qq.com/${{ secrets.SENDER_EMAIL }}/" config.json
+        fi
+        if [ -n "${{ secrets.RECIPIENT_EMAIL }}" ]; then
+          sed -i "s/recipient@example.com/${{ secrets.RECIPIENT_EMAIL }}/" config.json
+        fi
+
+    - name: Run AI News Fetcher
+      env:
+        AI_NEWS_EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
+      run: |
+        python run.py --no-email
+
+    - name: Upload output
+      uses: actions/upload-artifact@v4
+      with:
+        name: news-output
+        path: output/
+        retention-days: 7

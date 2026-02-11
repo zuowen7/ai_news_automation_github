@@ -1,0 +1,14 @@
+# HTTP请求
+requests>=2.32.0
+
+# HTML解析
+beautifulsoup4>=4.12.3
+lxml>=4.9.3
+
+# RSS解析
+feedparser>=6.0.0
+
+# 开发依赖（可选）
+# pytest>=7.4.0
+# pytest-cov>=4.1.0
+# black>=23.0.0
