@@ -34,8 +34,17 @@ class NewsAIFilter:
 
     # 高价值关键词（直接影响是否保留）
     HIGH_VALUE_KEYWORDS = {
-        # 2025年热门模型和产品
+        # 2025-2026年热门模型和产品
         'claude 4', 'gemini 2.0', 'gpt-5', 'o3', 'llama 4', 'mistral large',
+
+        # 国内大模型（新增）
+        'glm 4', 'glm 5', 'glm-4', 'glm-5',
+        'minimax 2.5', 'minimax-2.5',
+        'deepseek v3', 'deepseek-r1',
+        'qwen 2.5', 'qwen-2.5', 'qwen2.5-max',
+        'baichuan 4', 'internlm', 'yi-large',
+
+        # 其他重要模型
         'deepseek', 'qwen 2', 'sora', 'runway', 'midjourney', 'stable diffusion 3',
 
         # 重要技术突破
@@ -217,8 +226,8 @@ class NewsAIFilter:
             self.logger.info("没有常规新闻需要筛选")
             return high_value_items
 
-        # 先进行关键词预筛选
-        regular_news = self.pre_filter_news(regular_news, min_score=1.5)
+        # 先进行关键词预筛选（降低门槛，让更多国内新闻进入AI评估）
+        regular_news = self.pre_filter_news(regular_news, min_score=1.0)
 
         if not regular_news:
             self.logger.info("预筛选后没有剩余新闻")
@@ -243,8 +252,8 @@ class NewsAIFilter:
             self.logger.info(f"筛选完成（无AI）：国内 {len(final_domestic)} 条，国际 {len(final_global)} 条")
             return high_value_items + final_regular
 
-        # 对国内新闻进行AI筛选（最多15条给AI评估）
-        filtered_domestic = self._filter_region_news(domestic_news, "domestic", max_input=15, max_output=5)
+        # 对国内新闻进行AI筛选（增加到20条，提高覆盖率）
+        filtered_domestic = self._filter_region_news(domestic_news, "domestic", max_input=20, max_output=5)
         filtered_global = self._filter_region_news(global_news, "global", max_input=30, max_output=10)
 
         filtered = filtered_domestic + filtered_global
