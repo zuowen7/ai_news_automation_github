@@ -153,8 +153,34 @@ $env:AI_NEWS_EMAIL_PASSWORD="your_qq_auth_code"
 
 ### 6. 运行程序
 
+#### 方式1：使用批处理文件（推荐）⭐
+
+直接双击 `run_ai_news.bat` 文件即可运行！
+
+**优点：**
+- ✅ 自动切换到正确的项目目录
+- ✅ 自动加载配置文件
+- ✅ 显示运行状态和当前目录
+- ✅ 运行完成后暂停，方便查看输出
+
+**文件位置：**
+```
+ai_news_automation_github/
+└── run_ai_news.bat          # 一键启动脚本
+```
+
+#### 方式2：使用命令行
+
 ```bash
 python run.py
+```
+
+#### 方式3：指定配置文件
+
+如果配置文件不在默认位置，可以使用：
+
+```bash
+python run.py --config "D:\path\to\config.json"
 ```
 
 ## 配置选项
