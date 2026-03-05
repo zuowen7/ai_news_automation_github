@@ -13,6 +13,7 @@ from src.config.settings import get_config_manager
 from src.fetchers import FetcherManager
 from src.ai import NewsAIProcessor, NewsAIFilter
 from src.email import EmailSender
+from src.web.app import create_app
 
 
 class NewsAutomationApp:
@@ -34,6 +35,8 @@ class NewsAutomationApp:
         self.ai_processor = None
         self.ai_filter = None
         self.email_sender = None
+        self.database_saver = None
+        self.flask_app = None
 
     def initialize(self):
         """初始化各模块"""
@@ -41,6 +44,15 @@ class NewsAutomationApp:
         self.logger.info("AI新闻自动化系统启动")
         self.logger.info(f"版本: 2.3.0 (智能去重+质量评分)")
         self.logger.info("=" * 50)
+
+        # 初始化Flask应用和数据库
+        self.flask_app = create_app()
+        self.logger.info("数据库已初始化")
+
+        # 初始化数据库保存器
+        from src.web.services.database_saver import DatabaseSaver
+        self.database_saver = DatabaseSaver()
+        self.logger.info("数据库保存器已初始化")
 
         # 初始化抓取管理器（启用缓存和可选的动态并发）
         self.fetcher_manager = FetcherManager(
@@ -95,6 +107,10 @@ class NewsAutomationApp:
         Returns:
             是否执行成功
         """
+        start_time = datetime.now()
+        run_status = "success"
+        error_message = None
+
         try:
             self.initialize()
 
@@ -104,15 +120,18 @@ class NewsAutomationApp:
 
             if not news_list:
                 self.logger.warning("未获取到任何新闻")
+                run_status = "failed"
+                error_message = "未获取到任何新闻"
+                self._save_run_history(start_time, datetime.now(), run_status, 0, 0, 0, 0, 0, error_message)
                 return False
 
             stats = self.fetcher_manager.get_statistics(news_list)
             self.logger.info(f"抓取完成 - 总计: {stats['total']}, 国内: {stats['domestic']}, 国际: {stats['global']}")
 
             # 1.5. AI智能筛选（可选）
+            original_count = len(news_list)
             if self.ai_filter and self.ai_filter.is_available() and self.config.ai.enable_filter:
                 self.logger.info("\n开始AI智能筛选...")
-                original_count = len(news_list)
                 news_list = self.ai_filter.filter_news(news_list)
                 self.logger.info(f"AI筛选完成：{original_count} -> {len(news_list)} 条")
 
@@ -132,6 +151,14 @@ class NewsAutomationApp:
             output_dir = self.config.output.output_dir
             self.email_sender.save_to_file(news_list, ai_summary, ai_trends, output_dir)
 
+            # 3.5. 保存到数据库（新增）
+            self.logger.info("\n保存到数据库...")
+            with self.flask_app.app_context():
+                db_stats = self.database_saver.save_news_list(news_list, ai_summary, ai_trends)
+                self.logger.info(f"数据库保存完成 - 新增: {db_stats['added']}, 跳过: {db_stats['skipped']}")
+                today_count = self.database_saver.get_today_news_count()
+                self.logger.info(f"今天数据库中共有 {today_count} 条新闻")
+
             # 4. 发送邮件
             if send_email and self.email_sender._is_email_configured():
                 self.logger.info("\n发送邮件...")
@@ -140,6 +167,10 @@ class NewsAutomationApp:
                     self.logger.info("邮件发送成功！")
                 else:
                     self.logger.error("邮件发送失败")
+                    run_status = "error"
+                    error_message = "邮件发送失败"
+                    self._save_run_history(start_time, datetime.now(), run_status, stats['total'],
+                                         original_count, len(news_list), 0, 0, error_message)
                     return False
             else:
                 self.logger.info("\n跳过邮件发送")
@@ -147,12 +178,53 @@ class NewsAutomationApp:
             # 清理资源
             self.cleanup()
 
+            # 保存运行历史
+            self._save_run_history(start_time, datetime.now(), run_status, stats['total'],
+                                 original_count, len(news_list), 0, 0, None)
+
             self.logger.info("\n任务完成！")
             return True
 
         except Exception as e:
             self.logger.error(f"运行出错: {e}", exc_info=True)
+            run_status = "error"
+            error_message = str(e)
+            self._save_run_history(start_time, datetime.now(), run_status, 0, 0, 0, 0, 0, error_message)
             return False
+
+    def _save_run_history(self, start_time: datetime, end_time: datetime, status: str,
+                         total_fetched: int, unique_news: int, final_selected: int,
+                         sources_success: int, sources_total: int, error_message: str = None):
+        """
+        保存运行历史
+
+        Args:
+            start_time: 开始时间
+            end_time: 结束时间
+            status: 状态
+            total_fetched: 抓取总数
+            unique_news: 去重后数量
+            final_selected: 最终筛选数量
+            sources_success: 成功源数量
+            sources_total: 总源数量
+            error_message: 错误信息
+        """
+        if self.database_saver and self.flask_app:
+            try:
+                with self.flask_app.app_context():
+                    self.database_saver.save_run_history(
+                        start_time=start_time,
+                        end_time=end_time,
+                        status=status,
+                        total_fetched=total_fetched,
+                        unique_news=unique_news,
+                        final_selected=final_selected,
+                        sources_success=sources_success,
+                        sources_total=sources_total,
+                        error_message=error_message
+                    )
+            except Exception as e:
+                self.logger.error(f"保存运行历史失败: {e}")
 
     def cleanup(self):
         """清理资源"""
@@ -234,22 +306,31 @@ def main():
     # 数据导入模式
     if args.import_data:
         try:
+            from src.web.app import create_app
             from src.web.services.data_importer import DataImporter
             from src.utils.logger import get_logger
 
             logger = get_logger('import')
             logger.info("开始导入历史数据...")
 
-            importer = DataImporter('output')
-            stats = importer.sync_from_output()
+            # 创建Flask应用并运行在应用上下文中
+            app = create_app()
+            with app.app_context():
+                importer = DataImporter('output')
+                stats = importer.sync_from_output()
 
-            logger.info(f"导入完成: {stats}")
-            print(f"\n导入统计:")
-            print(f"  文件: {stats['success_files']}/{stats['total_files']}")
-            print(f"  新闻: {stats['imported_news']}/{stats['total_news']}")
-            print(f"  跳过: {stats['skipped_news']}")
+                logger.info(f"导入完成: {stats}")
+                print(f"\n导入统计:")
+                print(f"  文件: {stats['success_files']}/{stats['total_files']}")
+                print(f"  新闻: {stats['imported_news']}/{stats['total_news']}")
+                print(f"  跳过: {stats['skipped_news']}")
         except ImportError as e:
             print(f"错误: 无法导入数据模块 - {e}")
+            sys.exit(1)
+        except Exception as e:
+            print(f"导入失败: {e}")
+            import traceback
+            traceback.print_exc()
             sys.exit(1)
         return
 

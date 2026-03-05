@@ -370,6 +370,78 @@ INCREMENTAL_FETCH_CONFIG = {
     "skip_cached": True,        # 是否跳过已缓存的新闻
 }
 
+# 特定网站选择器（用于需要特殊处理的网站）
+SITE_SPECIFIC_SELECTORS = {
+    'techcrunch.com': [
+        ('.post-header h2 a', 'href'),
+        ('h2 a', 'href'),
+    ],
+    'venturebeat.com': [
+        ('.article-title a', 'href'),
+        ('h2 a', 'href'),
+    ],
+    'arstechnica.com': [
+        ('.headline a', 'href'),
+        ('h2 a', 'href'),
+    ],
+    'wired.com': [
+        ('.title-card a', 'href'),
+        ('h2 a', 'href'),
+    ],
+    'theverge.com': [
+        ('.c-entry-hero__headline a', 'href'),
+        ('h2 a', 'href'),
+    ],
+    'technologyreview.com': [
+        ('.blog-post__title a', 'href'),
+        ('h2 a', 'href'),
+    ],
+    'nature.com': [
+        ('.article__title a', 'href'),
+        ('h3 a', 'href'),
+    ],
+    'science.org': [
+        ('.article-title a', 'href'),
+        ('h3 a', 'href'),
+    ],
+    'leiphone.com': [
+        ('.info-title a', 'href'),
+        ('h2 a', 'href'),
+    ],
+    '36kr.com': [
+        ('.item-title a', 'href'),
+        ('h2 a', 'href'),
+    ],
+    'huxiu.com': [
+        ('.title a', 'href'),
+        ('h2 a', 'href'),
+    ],
+    'jiqizhixin.com': [
+        ('.article-title a', 'href'),
+        ('h2 a', 'href'),
+    ],
+    'infoq.cn': [
+        ('.title a', 'href'),
+        ('h2 a', 'href'),
+    ],
+    'geekpark.net': [
+        ('.post-title a', 'href'),
+        ('h2 a', 'href'),
+    ],
+    'qbitai.com': [
+        ('.post-title a', 'href'),
+        ('h2 a', 'href'),
+    ],
+    'yanxishe.com': [
+        ('.article-title a', 'href'),
+        ('h2 a', 'href'),
+    ],
+    'tmtpost.com': [
+        ('.post-title a', 'href'),
+        ('h2 a', 'href'),
+    ],
+}
+
 # HTML解析选择器
 NEWS_SELECTORS = [
     # 标准文章标题
