@@ -29,6 +29,20 @@ DEFAULT_SOURCES = {
         {"name": "中科院自动化所", "url": "http://www.ia.cas.cn/", "enabled": False},
         {"name": "清华AI", "url": "https://www.tsinghua.edu.cn/ai/", "enabled": False},  # 404
         {"name": "算法与数学之美", "url": "https://www.cbdio.com/", "enabled": True},  # SSL修复
+
+        # ========== 国内AI官方渠道（新增）==========
+        {"name": "智谱AI", "url": "https://www.zhipuai.cn/news", "enabled": True},
+        {"name": "MiniMax官网", "url": "https://www.minimax.ai/news", "enabled": True},
+        {"name": "百度文心一言", "url": "https://yiyan.baidu.com/news", "enabled": True},
+        {"name": "阿里通义千问", "url": "https://tongyi.aliyun.com/news", "enabled": True},
+        {"name": "DeepSeek官网", "url": "https://www.deepseek.com/news", "enabled": True},
+
+        # ========== 国内科技媒体（新增）==========
+        {"name": "IT之家AI", "url": "https://www.ithome.com/tags/AI", "enabled": True},
+        {"name": "中关村在线AI", "url": "https://www.zol.com.cn/", "enabled": True},
+        {"name": "至顶网AI", "url": "http://www.zhiding.com/", "enabled": True},
+        {"name": "快科技AI", "url": "https://www.mydrivers.com/", "enabled": False},  # 可能需要定制
+        {"name": "雷锋网AI", "url": "https://www.leiphone.com/category/ai", "enabled": True},
     ],
     "global": [
         # ========== 顶级科技媒体RSS（已验证）==========
@@ -119,13 +133,24 @@ AI_KEYWORDS = {
 
     # ========== 大语言模型（高权重）==========
     "llm": [
+        # 国外主流模型
         'gpt', 'chatgpt', 'gpt-4', 'gpt-4o', 'gpt-5', 'o1', 'o3',
         'claude', 'claude 4', 'claude opus', 'claude sonnet',
         'gemini', 'gemini 2.0', 'gemini ultra', 'gemini pro',
         'llama', 'llama 2', 'llama 3', 'llama 4', 'mistral', 'mixtral',
-        'qwen', 'qwen 2', 'yi', 'baichuan', 'internlm', 'deepseek', 'grok',
+
+        # 国内大模型（新增）
+        'glm', 'glm-4', 'glm-5', 'glm4', 'glm5', 'chatglm', 'chatglm 4', 'chatglm-4',
+        'minimax', 'minimax 2.5', 'minimax-2.5', 'abab', 'abab 6',
+        'deepseek', 'deepseek v3', 'deepseek v2', 'deepseek-r1',
+        'qwen', 'qwen 2', 'qwen-2.5', 'qwen2.5', 'qwen 2-max', 'qwen-max',
+        'baichuan', 'baichuan 4', 'baichuan2', 'internlm', 'yi', 'yi-large', 'yi-1.5',
+
+        # 其他模型
         'mctr', 'dbrx', 'olmo', 'phi', 'vicuna', 'alpaca', 'wizardlm',
-        'chatglm', 'chatglm 2', 'chatglm 3', 'chatglm 4',
+        'chatglm 2', 'chatglm 3',
+
+        # 训练相关
         'prompt', 'prompt engineering', 'prompt tuning', 'in-context learning',
         'few-shot', 'zero-shot', 'one-shot', 'chain of thought', 'cot',
         'instruction tuning', 'rlhf', 'sft', 'ppo', 'dpo',
