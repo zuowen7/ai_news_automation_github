@@ -8,7 +8,7 @@ from typing import List, Optional
 
 from ..utils.logger import get_logger
 from ..config.constants import AI_PROMPTS
-from .ollama_client import OllamaClient
+from .client_factory import create_ai_client
 from ..fetchers.base import NewsItem
 from ..config.settings import AIConfig
 
@@ -65,7 +65,7 @@ class NewsAIProcessor:
         """
         self.config = config
         self.logger = get_logger("ai.processor")
-        self.client = OllamaClient(config)
+        self.client = create_ai_client(config)
         self.cache_manager = cache_manager
         self._summary_cache: Optional[str] = None
         self._trends_cache: Optional[str] = None

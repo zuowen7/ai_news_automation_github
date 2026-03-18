@@ -502,6 +502,9 @@ DEFAULT_CONFIG = {
     "ai": {
         "enabled": True,
         "ollama_url": "http://localhost:11434",
+        "provider": "",
+        "api_key": "",
+        "custom_base_url": "",
         "model_name": "qwen3:8b",
         "temperature": 0.7,
         "max_tokens": 2000,
