@@ -36,7 +36,13 @@ class SettingsConfig:
 class AIConfig:
     """AI配置"""
     enabled: bool = True
+    # ---------- 本地 Ollama 原生接口（向后兼容） ----------
     ollama_url: str = "http://localhost:11434"
+    # ---------- 远程大模型 / OpenAI 兼容接口 ----------
+    provider: str = ""           # openai | deepseek | qwen | zhipu | moonshot | siliconflow | 留空则走 Ollama
+    api_key: str = ""            # 远程服务商 API Key（本地 Ollama 可不填）
+    custom_base_url: str = ""    # 自定义 base_url，优先级高于 provider
+    # ---------- 公共参数 ----------
     model_name: str = "qwen3:8b"
     temperature: float = 0.7
     max_tokens: int = 2000
@@ -117,6 +123,12 @@ class ConfigManager:
             if env_password and env_password.strip():
                 config_data['email']['sender_password'] = env_password.strip()
                 self.logger.info("邮箱密码已从环境变量加载")
+
+            # 从环境变量获取远程大模型 API Key
+            env_api_key = os.getenv('AI_NEWS_API_KEY')
+            if env_api_key and env_api_key.strip():
+                config_data.setdefault('ai', {})['api_key'] = env_api_key.strip()
+                self.logger.info("AI API Key 已从环境变量 AI_NEWS_API_KEY 加载")
 
             # 验证并创建配置对象
             self._config = self._parse_config(config_data)
@@ -204,10 +216,14 @@ class ConfigManager:
             "ai": {
                 "enabled": config.ai.enabled,
                 "ollama_url": config.ai.ollama_url,
+                "provider": config.ai.provider,
+                "api_key": "",          # 不写回文件，从环境变量读取
+                "custom_base_url": config.ai.custom_base_url,
                 "model_name": config.ai.model_name,
                 "temperature": config.ai.temperature,
                 "max_tokens": config.ai.max_tokens,
-                "timeout": config.ai.timeout
+                "timeout": config.ai.timeout,
+                "enable_filter": config.ai.enable_filter,
             },
             "fetcher": {
                 "max_news_per_source": config.fetcher.max_news_per_source,

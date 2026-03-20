@@ -10,7 +10,7 @@ from ..utils.logger import get_logger
 from ..fetchers.base import NewsItem
 from ..config.settings import AIConfig
 from ..config.constants import AI_KEYWORDS, EXCLUDE_KEYWORDS, ALL_AI_KEYWORDS
-from .ollama_client import OllamaClient
+from .client_factory import create_ai_client
 
 
 class NewsAIFilter:
@@ -68,7 +68,7 @@ class NewsAIFilter:
         """
         self.config = config
         self.logger = get_logger("ai.filter")
-        self.client = OllamaClient(config)
+        self.client = create_ai_client(config)
 
         # 构建关键词查找索引
         self._build_keyword_index()
